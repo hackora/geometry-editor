@@ -39,11 +39,14 @@ Scenario::cleanUp() {
   _renderer->releaseCamera();
   _scene->removeCamera(_camera.get());
 
+  _renderer.reset();
+  _camera.reset();
+
   _scene->clear();
   _scene.reset();
 
   // Clean up GMlib GL backend
-//  GMlib::GL::OpenGLManager::cleanUp();   // NO IMPLEMENTED IN GMlib
+  GMlib::GL::OpenGLManager::cleanUp();
 }
 
 void

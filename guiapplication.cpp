@@ -35,7 +35,6 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
 
 GuiApplication::~GuiApplication() {
 
-
   _scenario.stopSimulation();
 
   _window.releasePersistence();
