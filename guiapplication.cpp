@@ -1,11 +1,14 @@
 #include "guiapplication.h"
 
+// qt
+#include <QOpenGLContext>
+#include <QDebug>
+
 // stl
 #include <iostream>
 #include <cassert>
 
-// qt
-#include <QDebug>
+
 
 GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, argv) {
 
@@ -15,12 +18,12 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
            this,     &GuiApplication::onSceneGraphInitialized,
            Qt::DirectConnection );
 
-  connect( &_window, &Window::sceneGraphInvalidated,
-           this,     &GuiApplication::onSceneGraphInvalidated,
-           Qt::DirectConnection );
-
   connect( this, &GuiApplication::signOnSceneGraphInitializedDone,
            this, &GuiApplication::afterOnSceneGraphInitialized );
+
+  connect( &_window, &Window::sceneGraphInvalidated,
+           this,     &GuiApplication::cleanUpGL,
+           Qt::DirectConnection );
 
   connect( this, &QGuiApplication::lastWindowClosed,
            this, &QGuiApplication::quit );
@@ -32,7 +35,10 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
 
 GuiApplication::~GuiApplication() {
 
+
   _scenario.stopSimulation();
+
+  _window.releasePersistence();
   _window.releaseResources();
 
   std::cout << "Bye bye ^^, ~~ \"emerge --oneshot life\"" << std::endl;
@@ -61,8 +67,7 @@ GuiApplication::afterOnSceneGraphInitialized() {
   _scenario.startSimulation();
 }
 
-void
-GuiApplication::onSceneGraphInvalidated() {
+void GuiApplication::cleanUpGL() {
 
   _scenario.cleanUp();
 }

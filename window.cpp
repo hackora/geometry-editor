@@ -39,8 +39,9 @@ Window::Window(QWindow *parent) : QQuickView(parent) {
   setFormat(format);
 }
 
-Window::~Window() {
+void Window::releasePersistence() {
 
   setPersistentOpenGLContext(false);
   setPersistentSceneGraph(false);
 }
+

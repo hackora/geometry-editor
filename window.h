@@ -12,7 +12,8 @@ class Window : public QQuickView {
   Q_OBJECT
 public:
   explicit Window(QWindow *parent = 0);
-  ~Window();
+
+  void      releasePersistence();
 
 signals:
 

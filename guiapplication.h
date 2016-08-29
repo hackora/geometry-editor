@@ -27,7 +27,7 @@ private slots:
   virtual void                                onSceneGraphInitialized();
   virtual void                                afterOnSceneGraphInitialized();
 
-  virtual void                                onSceneGraphInvalidated();
+  virtual void                                cleanUpGL();
 
 signals:
   void                                        signOnSceneGraphInitializedDone();
