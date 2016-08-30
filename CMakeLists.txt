@@ -63,6 +63,7 @@ set( SRCS
   guiapplication.cpp
   inlinefborendertarget.cpp
   scenario.cpp
+  testtorus.cpp
   window.cpp
 
   main.cpp

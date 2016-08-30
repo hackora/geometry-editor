@@ -22,7 +22,6 @@ Scenario::Scenario() : QObject(), _timer_id{0}/*, _select_renderer{nullptr}*/ {
     exit(666);
   }
 
-
   _instance = std::unique_ptr<Scenario>(this);
 }
 
@@ -32,9 +31,15 @@ Scenario::~Scenario() {
 }
 
 void
-Scenario::cleanUp() {
+Scenario::deinitialize() {
 
   stopSimulation();
+
+  _scene->remove(_testtorus.get());
+  _testtorus.reset();
+
+  _scene->removeLight(_light.get());
+  _light.reset();
 
   _renderer->releaseCamera();
   _scene->removeCamera(_camera.get());
@@ -64,10 +69,10 @@ Scenario::initializeScenario() {
 
   // Insert a light
   auto init_light_pos = GMlib::Point<GLfloat,3>( 2.0, 4.0, 10 );
-  auto light          = new GMlib::PointLight(  GMlib::GMcolor::White, GMlib::GMcolor::White,
+  _light = std::make_shared<GMlib::PointLight>( GMlib::GMcolor::White, GMlib::GMcolor::White,
                                                 GMlib::GMcolor::White, init_light_pos );
-  light->setAttenuation(0.8, 0.002, 0.0008);
-  _scene->insertLight( light, false );
+  _light->setAttenuation(0.8, 0.002, 0.0008);
+  _scene->insertLight( _light.get(), false );
 
   // Insert Sun
   _scene->insertSun();
@@ -91,12 +96,12 @@ Scenario::initializeScenario() {
   _renderer->reshape( GMlib::Vector<int,2>(init_viewport_size, init_viewport_size) );
 
   // Surface
-  auto surface = new TestTorus;
-  surface->toggleDefaultVisualizer();
-  surface->replot(200,200,1,1);
-  _scene->insert(surface);
+  _testtorus = std::make_shared<TestTorus>();
+  _testtorus->toggleDefaultVisualizer();
+  _testtorus->replot(200,200,1,1);
+  _scene->insert(_testtorus.get());
 
-  surface->test01();
+  _testtorus->test01();
 }
 
 std::unique_ptr<Scenario> Scenario::_instance {nullptr};

@@ -1,13 +1,16 @@
 #ifndef SCENARIO_H
 #define SCENARIO_H
 
+// local
+class TestTorus;
+
 // gmlib
 namespace GMlib {
 
   class Scene;
   class Camera;
+  class PointLight;
   class DefaultRenderer;
-//  class DefaultSelectRenderer;
   class RenderTarget;
 }
 
@@ -26,7 +29,7 @@ public:
   virtual ~Scenario();
 
   void                                              initialize();
-  void                                              cleanUp();
+  void                                              deinitialize();
   virtual void                                      initializeScenario();
 
   void                                              startSimulation();
@@ -46,6 +49,9 @@ private:
   std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr };
   std::shared_ptr<GMlib::Camera>                    _camera   { nullptr };
   QRect                                             _viewport { QRect(0,0,1,1) };
+
+  std::shared_ptr<GMlib::PointLight>                _light;
+  std::shared_ptr<TestTorus>                        _testtorus;
 
 private:
   static std::unique_ptr<Scenario>                  _instance;

@@ -22,7 +22,7 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
            this, &GuiApplication::afterOnSceneGraphInitialized );
 
   connect( &_window, &Window::sceneGraphInvalidated,
-           this,     &GuiApplication::cleanUpGL,
+           this,     &GuiApplication::onSceneGraphInvalidated,
            Qt::DirectConnection );
 
   connect( this, &QGuiApplication::lastWindowClosed,
@@ -66,7 +66,7 @@ GuiApplication::afterOnSceneGraphInitialized() {
   _scenario.startSimulation();
 }
 
-void GuiApplication::cleanUpGL() {
+void GuiApplication::onSceneGraphInvalidated() {
 
-  _scenario.cleanUp();
+  _scenario.deinitialize();
 }
