@@ -9,6 +9,7 @@
 
 // stl
 #include <memory>
+#include <queue>
 
 
 
@@ -23,11 +24,18 @@ private:
   Window                                      _window;
   Scenario                                    _scenario;
 
+  std::queue<std::shared_ptr<QInputEvent>>    _input_events;
+  
+
 private slots:
+  void                                        handleGLInputEvents();
+  void                                        handleKeyPress( QKeyEvent* );
+
   virtual void                                onSceneGraphInitialized();
   virtual void                                afterOnSceneGraphInitialized();
 
   virtual void                                onSceneGraphInvalidated();
+
 
 signals:
   void                                        signOnSceneGraphInitializedDone();

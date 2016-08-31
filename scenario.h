@@ -39,6 +39,8 @@ public:
   void                                              render( const QRect& viewport, GMlib::RenderTarget& target );
   void                                              prepare();
 
+  void                                              replotTesttorus();
+
 protected:
   void                                              timerEvent(QTimerEvent *e) override;
 

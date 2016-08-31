@@ -28,6 +28,18 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
   connect( this, &QGuiApplication::lastWindowClosed,
            this, &QGuiApplication::quit );
 
+
+  connect( &_window, &Window::signKeyPressed,
+           this,     &GuiApplication::handleKeyPress );
+
+
+  connect( &_window, &Window::beforeRendering,
+           this,     &GuiApplication::handleGLInputEvents,
+	   Qt::DirectConnection );
+
+
+
+
   _window.setSource(QUrl("qrc:///qml/main.qml"));
   _window.show();
 }
@@ -70,3 +82,32 @@ void GuiApplication::onSceneGraphInvalidated() {
 
   _scenario.deinitialize();
 }
+
+void GuiApplication::handleKeyPress( QKeyEvent* e ) {
+
+  if(e->key() == Qt::Key_Q) {
+    _window.close();
+  }
+  else if(e->key() == Qt::Key_P) {
+    _input_events.push(std::make_shared<QKeyEvent>(*e));
+  }
+}
+
+void GuiApplication::handleGLInputEvents() {
+
+  while(!_input_events.empty()) {
+
+    const auto& e  = _input_events.front();
+    const auto& ke = std::dynamic_pointer_cast<const QKeyEvent>(e);
+
+    if(ke and ke->key() == Qt::Key_P) {
+      qDebug() << "Handling the P button";
+      _scenario.replotTesttorus();
+    }
+
+    _input_events.pop();
+  }
+}
+
+
+

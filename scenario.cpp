@@ -161,3 +161,8 @@ Scenario::timerEvent(QTimerEvent* e) {
 
 void
 Scenario::toggleSimulation() { _scene->toggleRun(); }
+
+void
+Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
+
+
