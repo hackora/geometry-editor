@@ -8,10 +8,14 @@ class TestTorus;
 namespace GMlib {
 
   class Scene;
+  class SceneObject;
   class Camera;
   class PointLight;
   class DefaultRenderer;
   class RenderTarget;
+
+  template <typename T>
+  class PTorus;
 }
 
 // qt
@@ -40,6 +44,15 @@ public:
   void                                              prepare();
 
   void                                              replotTesttorus();
+
+  void         save();
+
+private:
+  void         save( std::ofstream& os, const GMlib::SceneObject* obj);
+
+  void         saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
+  void         savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
+
 
 protected:
   void                                              timerEvent(QTimerEvent *e) override;

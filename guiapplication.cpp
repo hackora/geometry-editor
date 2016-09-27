@@ -91,6 +91,9 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
   else if(e->key() == Qt::Key_P) {
     _input_events.push(std::make_shared<QKeyEvent>(*e));
   }
+  else if(e->key() == Qt::Key_S) {
+    _scenario.save();
+  }
 }
 
 void GuiApplication::handleGLInputEvents() {

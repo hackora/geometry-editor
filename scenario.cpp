@@ -8,9 +8,12 @@
 
 // qt
 #include <QTimerEvent>
+#include <QDebug>
 
 // stl
 #include <cassert>
+#include <iostream>
+#include <iomanip>
 
 Scenario::Scenario() : QObject(), _timer_id{0}/*, _select_renderer{nullptr}*/ {
 
@@ -164,5 +167,100 @@ Scenario::toggleSimulation() { _scene->toggleRun(); }
 
 void
 Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
+
+void
+Scenario::save() {
+
+  qDebug() << "Saving scene...";
+  stopSimulation(); {
+
+
+    auto filename = std::string("gmlib_save.openddl");
+
+    auto os = std::ofstream(filename,std::ios_base::out);
+    if(!os.is_open()) {
+      std::cerr << "Unable to open " << filename << " for saving..."
+                << std::endl;
+      return;
+    }
+
+
+    os << "GMlibVersion { int { 0x"
+       << std::setw(6) << std::setfill('0')
+       << std::hex << GM_VERSION
+       << " } }"
+       << std::endl;
+
+
+    auto &scene = *_scene;
+    for( auto i = 0; i < scene.getSize(); ++i ) {
+
+      const auto obj = scene[i];
+      save(os,obj);
+
+    }
+
+
+
+  } startSimulation();
+
+}
+
+void Scenario::save(std::ofstream &os,
+                    const GMlib::SceneObject *obj) {
+
+
+  auto cam_obj = dynamic_cast<const GMlib::Camera*>(obj);
+  if(cam_obj) return;
+
+
+  os << obj->getIdentity() << std::endl
+     << "{" << std::endl;
+
+  saveSO(os,obj);
+
+  auto ptorus_obj = dynamic_cast<const GMlib::PTorus<float>*>(obj);
+  if(ptorus_obj)
+    savePT(os,ptorus_obj);
+
+  const auto& children = obj->getChildren();
+  for(auto i = 0; i < children.getSize(); ++i )
+    save(os,children(i));
+
+  os << "}"
+     << std::endl;
+
+}
+
+void Scenario::saveSO(std::ofstream &os,
+                      const GMlib::SceneObject *obj) {
+
+  os << "SceneObjectData" << std::endl
+     << "{" << std::endl;
+
+
+
+  os << "setCollapsed( bool {"
+     << "  " << ( obj->isCollapsed()?"true":"false")
+     << "} )";
+
+
+
+
+
+  os << "}"
+     << std::endl;
+
+}
+
+void Scenario::savePT(std::ofstream &os,
+                      const GMlib::PTorus<float> *obj) {
+
+  os << "PTorusData" << std::endl
+     << "{" << std::endl;
+
+  os << "}"
+     << std::endl;
+}
 
 
