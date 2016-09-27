@@ -45,13 +45,18 @@ public:
 
   void                                              replotTesttorus();
 
-  void         save();
+
+  void          load();
+
+
+
+  void          save();
 
 private:
-  void         save( std::ofstream& os, const GMlib::SceneObject* obj);
+  void          save( std::ofstream& os, const GMlib::SceneObject* obj);
 
-  void         saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
-  void         savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
+  void          saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
+  void          savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
 
 
 protected:

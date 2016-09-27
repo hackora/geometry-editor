@@ -1,0 +1,3 @@
+[submodule "openddl"]
+	path = openddl
+	url = git@source.uit.no:STE6274/openddl.git

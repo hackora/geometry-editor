@@ -43,6 +43,10 @@ endif(WIN32)
 
 
 
+add_subdirectory(openddl)
+
+
+
 #######
 # Files
 
@@ -55,6 +59,9 @@ set( HDRS
   testtorus.h
   window.h
 
+  gmlibsceneloader/gmlibsceneloaderdatadescription.h
+  gmlibsceneloader/gmlibversionstructure.h
+
   )
 
 set( SRCS
@@ -65,6 +72,9 @@ set( SRCS
   scenario.cpp
   testtorus.cpp
   window.cpp
+
+  gmlibsceneloader/gmlibsceneloaderdatadescription.cpp
+  gmlibsceneloader/gmlibversionstructure.cpp
 
   main.cpp
   )
@@ -94,6 +104,7 @@ add_executable( ${CMAKE_PROJECT_NAME} ${HDRS} ${SRCS} ${HDRS_MOC} ${FORM_HDRS} $
 ######
 # Link
 target_link_libraries( ${CMAKE_PROJECT_NAME}
+  openddl
   ${GMlib_LIBRARIES}
   Qt5::Core
   Qt5::Quick

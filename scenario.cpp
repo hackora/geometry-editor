@@ -1,6 +1,11 @@
 #include "scenario.h"
 #include "testtorus.h"
 
+#include "gmlibsceneloader/gmlibsceneloaderdatadescription.h"
+
+// openddl
+#include "openddl/openddl.h"
+
 // gmlib
 #include <gmOpenglModule>
 #include <gmSceneModule>
@@ -167,6 +172,61 @@ Scenario::toggleSimulation() { _scene->toggleRun(); }
 
 void
 Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
+
+void Scenario::load() {
+
+  qDebug() << "Open scene...";
+  stopSimulation(); {
+
+
+    auto filename = std::string("gmlib_save.openddl");
+
+    auto is = std::ifstream(filename,std::ios_base::in);
+    if(!is.is_open()) {
+      std::cerr << "Unable to open " << filename << " for reading..."
+                << std::endl;
+      return;
+    }
+
+    is.seekg( 0, std::ios_base::end );
+    auto buff_length = is.tellg();
+    is.seekg( 0, std::ios_base::beg );
+
+    std::vector<char> buffer(buff_length);
+    is.read(buffer.data(),buff_length);
+
+
+    std::cout << "Buffer length: " << buff_length << std::endl;
+
+    GMlibSceneLoaderDataDescription gsdd;
+
+    ODDL::DataResult result = gsdd.ProcessText(buffer.data());
+    if(result != ODDL::kDataOkay) {
+      std::cerr << "Data result no A-OK" << std::endl;
+      return;
+    }
+
+
+
+    std::cout << "Data result A-OK" << std::endl;
+    auto structure = gsdd.GetRootStructure()->GetFirstSubnode();
+    while(structure) {
+
+
+      // Do something ^^,
+      // Travers the ODDL structures and build your scene objects
+
+
+      structure = structure->Next();
+    }
+
+
+    // Load GMlib::SceneObjects into the scene.
+
+
+  } startSimulation();
+
+}
 
 void
 Scenario::save() {

@@ -94,6 +94,9 @@ void GuiApplication::handleKeyPress( QKeyEvent* e ) {
   else if(e->key() == Qt::Key_S) {
     _scenario.save();
   }
+  else if(e->key() == Qt::Key_O) {
+    _scenario.load();
+  }
 }
 
 void GuiApplication::handleGLInputEvents() {
