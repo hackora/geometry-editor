@@ -20,6 +20,33 @@
 #include <iostream>
 #include <iomanip>
 
+
+
+
+
+
+class SimStateLock {
+public:
+  SimStateLock( Scenario& scenario ) : _scenario{scenario} {
+
+    _state = _scenario.isSimulationRunning();
+  }
+
+  ~SimStateLock() {
+
+    if(_state) _scenario.startSimulation();
+    else       _scenario.stopSimulation();
+  }
+
+  Scenario&   _scenario;
+  bool        _state;
+};
+
+
+
+
+
+
 Scenario::Scenario() : QObject(), _timer_id{0}/*, _select_renderer{nullptr}*/ {
 
   if(_instance != nullptr) {
@@ -170,61 +197,74 @@ Scenario::timerEvent(QTimerEvent* e) {
 void
 Scenario::toggleSimulation() { _scene->toggleRun(); }
 
+bool
+Scenario::isSimulationRunning() {
+
+  return _scene->isRunning();
+}
+
 void
 Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
 
 void Scenario::load() {
 
   qDebug() << "Open scene...";
-  stopSimulation(); {
+  SimStateLock a(*this);
+  stopSimulation();
 
 
-    auto filename = std::string("gmlib_save.openddl");
+  auto filename = std::string("gmlib_save.openddl");
 
-    auto is = std::ifstream(filename,std::ios_base::in);
-    if(!is.is_open()) {
-      std::cerr << "Unable to open " << filename << " for reading..."
-                << std::endl;
-      return;
-    }
+  auto is = std::ifstream(filename,std::ios_base::in);
+  if(!is.is_open()) {
+    std::cerr << "Unable to open " << filename << " for reading..."
+              << std::endl;
+    return;
+  }
 
-    is.seekg( 0, std::ios_base::end );
-    auto buff_length = is.tellg();
-    is.seekg( 0, std::ios_base::beg );
+  is.seekg( 0, std::ios_base::end );
+  auto buff_length = is.tellg();
+  is.seekg( 0, std::ios_base::beg );
 
-    std::vector<char> buffer(buff_length);
-    is.read(buffer.data(),buff_length);
-
-
-    std::cout << "Buffer length: " << buff_length << std::endl;
-
-    GMlibSceneLoaderDataDescription gsdd;
-
-    ODDL::DataResult result = gsdd.ProcessText(buffer.data());
-    if(result != ODDL::kDataOkay) {
-      std::cerr << "Data result no A-OK" << std::endl;
-      return;
-    }
+  std::vector<char> buffer(buff_length);
+  is.read(buffer.data(),buff_length);
 
 
+  std::cout << "Buffer length: " << buff_length << std::endl;
 
-    std::cout << "Data result A-OK" << std::endl;
-    auto structure = gsdd.GetRootStructure()->GetFirstSubnode();
-    while(structure) {
+  GMlibSceneLoaderDataDescription gsdd;
+
+  ODDL::DataResult result = gsdd.ProcessText(buffer.data());
+  if(result != ODDL::kDataOkay) {
+
+    auto res_to_char = [](auto nr, const ODDL::DataResult& result) {
+      return char(((0xff << (8*nr)) & result ) >> (8*nr));
+    };
+
+    auto res_to_str = [&res_to_char](const ODDL::DataResult& result) {
+      return std::string() + res_to_char(3,result) + res_to_char(2,result) + res_to_char(1,result) + res_to_char(0,result);
+    };
+
+    std::cerr << "Data result no A-OK: " << res_to_str(result) << " (" << result << ")" << std::endl;
+    return;
+  }
 
 
-      // Do something ^^,
-      // Travers the ODDL structures and build your scene objects
+
+  std::cout << "Data result A-OK" << std::endl;
+  auto structure = gsdd.GetRootStructure()->GetFirstSubnode();
+  while(structure) {
 
 
-      structure = structure->Next();
-    }
+    // Do something ^^,
+    // Travers the ODDL structures and build your scene objects
 
 
-    // Load GMlib::SceneObjects into the scene.
+    structure = structure->Next();
+  }
 
 
-  } startSimulation();
+  // Load GMlib::SceneObjects into the scene.
 
 }
 
@@ -232,38 +272,34 @@ void
 Scenario::save() {
 
   qDebug() << "Saving scene...";
-  stopSimulation(); {
+  SimStateLock a(*this);
+  stopSimulation();
 
 
-    auto filename = std::string("gmlib_save.openddl");
+  auto filename = std::string("gmlib_save.openddl");
 
-    auto os = std::ofstream(filename,std::ios_base::out);
-    if(!os.is_open()) {
-      std::cerr << "Unable to open " << filename << " for saving..."
-                << std::endl;
-      return;
-    }
-
-
-    os << "GMlibVersion { int { 0x"
-       << std::setw(6) << std::setfill('0')
-       << std::hex << GM_VERSION
-       << " } }"
-       << std::endl;
+  auto os = std::ofstream(filename,std::ios_base::out);
+  if(!os.is_open()) {
+    std::cerr << "Unable to open " << filename << " for saving..."
+              << std::endl;
+    return;
+  }
 
 
-    auto &scene = *_scene;
-    for( auto i = 0; i < scene.getSize(); ++i ) {
-
-      const auto obj = scene[i];
-      save(os,obj);
-
-    }
+  os << "GMlibVersion { int { 0x"
+     << std::setw(6) << std::setfill('0')
+     << std::hex << GM_VERSION
+     << " } }"
+     << std::endl;
 
 
+  auto &scene = *_scene;
+  for( auto i = 0; i < scene.getSize(); ++i ) {
 
-  } startSimulation();
+    const auto obj = scene[i];
+    save(os,obj);
 
+  }
 }
 
 void Scenario::save(std::ofstream &os,

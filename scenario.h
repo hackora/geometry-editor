@@ -39,6 +39,7 @@ public:
   void                                              startSimulation();
   void                                              stopSimulation();
   void                                              toggleSimulation();
+  bool                                              isSimulationRunning();
 
   void                                              render( const QRect& viewport, GMlib::RenderTarget& target );
   void                                              prepare();
