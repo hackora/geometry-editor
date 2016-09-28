@@ -286,7 +286,7 @@ Scenario::save() {
   }
 
 
-  os << "GMlibVersion { int { 0x"
+  os << "GMlibVersion { int32 { 0x"
      << std::setw(6) << std::setfill('0')
      << std::hex << GM_VERSION
      << " } }"

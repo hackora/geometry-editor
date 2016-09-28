@@ -17,5 +17,5 @@ GMlibVersionStructure::ValidateSubstructure(
     const ODDL::Structure *structure) const{
 
   std::cout << "subtype of " << GetStructureType() << " is " << structure->GetStructureType() << std::endl;
-  return structure->GetStructureType() == ODDL::kDataInt64;
+  return structure->GetStructureType() == ODDL::kDataInt32;
 }
