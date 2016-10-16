@@ -21,7 +21,8 @@ signals:
   void      signKeyPressed( QKeyEvent* event );
   void      signKeyReleased( QKeyEvent* event );
   void      signMouseDoubleClicked( QMouseEvent* event );
-  void      signMouseMoved( QMouseEvent* event );
+  void      signMouseMoved( QHoverEvent* event );
+  void      signMouseClickMoved( QMouseEvent* event );
   void      signMousePressed( QMouseEvent* event );
   void      signMouseReleased( QMouseEvent* event );
   void      signWheelEventOccurred( QWheelEvent* event );

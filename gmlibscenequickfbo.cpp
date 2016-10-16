@@ -7,6 +7,7 @@ GMlibSceneQuickFbo::GMlibSceneQuickFbo() {
 
   setAcceptedMouseButtons(Qt::AllButtons);
   setFocus(true,Qt::ActiveWindowFocusReason);
+  setAcceptHoverEvents(true);
 
   setMirrorVertically(true);
 
@@ -38,7 +39,10 @@ void
 GMlibSceneQuickFbo::mouseDoubleClickEvent(QMouseEvent* event) { emit signMouseDoubleClicked(event); }
 
 void
-GMlibSceneQuickFbo::mouseMoveEvent(QMouseEvent* event)        { emit signMouseMoved(event); }
+GMlibSceneQuickFbo::hoverMoveEvent(QHoverEvent* event)        { emit signMouseMoved(event); }
+
+void
+GMlibSceneQuickFbo::mouseMoveEvent(QMouseEvent* event)   { emit signMouseClickMoved(event); }
 
 void
 GMlibSceneQuickFbo::wheelEvent(QWheelEvent* event)            { emit signWheelEventOccurred(event); }
@@ -61,6 +65,9 @@ GMlibSceneQuickFbo::onWindowChanged(QQuickWindow* w) {
 
   connect( this,   &GMlibSceneQuickFbo::signMouseMoved,
            window, &Window::signMouseMoved );
+
+  connect( this,   &GMlibSceneQuickFbo::signMouseClickMoved,
+           window, &Window::signMouseClickMoved );
 
   connect( this,   &GMlibSceneQuickFbo::signMousePressed,
            window, &Window::signMousePressed );

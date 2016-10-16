@@ -25,6 +25,7 @@ protected:
   void              mousePressEvent(QMouseEvent *event) override;
   void              mouseReleaseEvent(QMouseEvent *event) override;
   void              mouseDoubleClickEvent(QMouseEvent *event) override;
+  void              hoverMoveEvent(QHoverEvent *event) override;
   void              mouseMoveEvent(QMouseEvent *event) override;
   void              wheelEvent(QWheelEvent *event) override;
 
@@ -44,7 +45,8 @@ signals:
   void              signKeyPressed( QKeyEvent* event );
   void              signKeyReleased( QKeyEvent* event );
   void              signMouseDoubleClicked( QMouseEvent* event );
-  void              signMouseMoved( QMouseEvent* event );
+  void              signMouseMoved( QHoverEvent* event );
+  void              signMouseClickMoved( QMouseEvent* event );
   void              signMousePressed( QMouseEvent* event );
   void              signMouseReleased( QMouseEvent* event );
   void              signWheelEventOccurred( QWheelEvent* event);

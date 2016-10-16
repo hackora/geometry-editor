@@ -8,7 +8,7 @@
 GMlibVersionStructure::GMlibVersionStructure()
   : ODDL::Structure(int(GMStructTypes::GMlibVersion)){
 
-  std::cout << "Constructing a GMlibVersionStructure object" << std::endl;
+  std::cout << "Constructing a GMlibVersionStructure object" << int(GMStructTypes::GMlibVersion)<< std::endl;
 }
 
 bool

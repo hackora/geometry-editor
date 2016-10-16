@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 14)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything")  # -Weverything equivalent to g++ -pedantic, -Werror and -Wall
 else()
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Werror")  # -Wsuggest-override")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall ")  # -Wsuggest-override")
 endif()
 
 # Nice name for the IDEs
@@ -61,6 +61,23 @@ set( HDRS
 
   gmlibsceneloader/gmlibsceneloaderdatadescription.h
   gmlibsceneloader/gmlibversionstructure.h
+  gmlibsceneloader/gmlibcamerastructure.h
+  gmlibsceneloader/gmlibsceneobjectdatastructure.h
+  gmlibsceneloader/gmlibsetstructure.h
+  gmlibsceneloader/gmlibsetcollapsedstructure.h
+  gmlibsceneloader/gmlibsetvisiblestructure.h
+  gmlibsceneloader/gmlibsetlightedstructure.h
+  gmlibsceneloader/gmlibpointstructure.h
+  gmlibsceneloader/gmlibvectorstructure.h
+  gmlibsceneloader/gmlibfloatstructure.h
+  gmlibsceneloader/gmlibpsurfdatastructure.h
+  gmlibsceneloader/gmlibptorusdatastructure.h
+  gmlibsceneloader/gmlibenabledefvisualstructure.h
+  gmlibsceneloader/gmlibreplotstructure.h
+  gmlibsceneloader/gmlibsetradius1structure.h
+  gmlibsceneloader/gmlibsetradius2structure.h
+  gmlibsceneloader/gmlibsetwheelstructure.h
+
 
   )
 
@@ -75,6 +92,25 @@ set( SRCS
 
   gmlibsceneloader/gmlibsceneloaderdatadescription.cpp
   gmlibsceneloader/gmlibversionstructure.cpp
+  gmlibsceneloader/gmlibcamerastructure.cpp
+  gmlibsceneloader/gmlibsceneobjectdatastructure.cpp
+  gmlibsceneloader/gmlibsetstructure.cpp
+  gmlibsceneloader/gmlibsetcollapsedstructure.cpp
+  gmlibsceneloader/gmlibsetvisiblestructure.cpp
+  gmlibsceneloader/gmlibsetlightedstructure.cpp
+  gmlibsceneloader/gmlibpointstructure.cpp
+  gmlibsceneloader/gmlibvectorstructure.cpp
+  gmlibsceneloader/gmlibfloatstructure.cpp
+  gmlibsceneloader/gmlibptorusstructure.cpp
+  gmlibsceneloader/gmlibpsurfdatastructure.cpp
+  gmlibsceneloader/gmlibptorusdatastructure.cpp
+  gmlibsceneloader/gmlibenabledefvisualstructure.cpp
+  gmlibsceneloader/gmlibreplotstructure.cpp
+  gmlibsceneloader/gmlibsetradius1structure.cpp
+  gmlibsceneloader/gmlibsetradius2structure.cpp
+  gmlibsceneloader/gmlibsetwheelstructure.cpp
+
+
 
   main.cpp
   )

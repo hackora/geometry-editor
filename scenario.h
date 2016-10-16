@@ -12,10 +12,23 @@ namespace GMlib {
   class Camera;
   class PointLight;
   class DefaultRenderer;
+  class DefaultSelectRenderer;
   class RenderTarget;
 
   template <typename T>
+  class Array;
+
+  template <typename T, int n>
+  class Vector;
+
+  template <typename T, int n>
+  class Point;
+
+  template <typename T>
   class PTorus;
+
+  template <typename T>
+  class PSphere;
 }
 
 // qt
@@ -25,6 +38,10 @@ namespace GMlib {
 // stl
 #include <iostream>
 #include <memory>
+
+// openddl
+#include "openddl/openddl.h"
+
 
 class Scenario: public QObject {
   Q_OBJECT
@@ -47,17 +64,66 @@ public:
   void                                              replotTesttorus();
 
 
-  void          load();
+  void                                              load();
 
+  void                                              save();
 
+  void                                              frontView();
 
-  void          save();
+  void                                              topView();
+
+  void                                              sideView();
+
+  void                                              toggleSelection(bool var);
+
+  GMlib::Array<GMlib::SceneObject*>                 selectedObjects();
+
+  void                                              addtoSelection(GMlib::SceneObject* obj);
+
+  void                                              removefromSelection(GMlib::SceneObject* obj);
+
+  void                                              cycleSelection(bool forward);
+
+  GMlib::SceneObject*                               findSceneObject(const QPoint& pos);
+
+  const GMlib::Point <int ,2>                       fromQtToGMlibViewPoint(const  QPoint& pos);
+
+  void                                              moveCamera(QPoint current, QPoint previous);
+
+  void                                              rotateCamera(QPoint current, QPoint previous);
+
+  void                                              moveCameraWheel(QPoint delta);
+
+  void                                              rotateSelectedObjects(GMlib::Array< GMlib::SceneObject*> objs, QPoint current, QPoint previous);
+
+  void                                              translateSelectedObjects(GMlib::Array< GMlib::SceneObject*> objs, QPoint current, QPoint previous);
+
+  void                                              scaleSelectedObjects(GMlib::Array< GMlib::SceneObject*> objs, QPoint current, QPoint previous);
+
+  void                                              addSphere();
+
+  void                                              addPTorus();
+
+  void                                              clearScene();
+
+  void                                              addPCylinder();
+
+  void                                              addPCone();
+
+  void                                              addPBentHorns();
+
+  void                                              addPApple();
 
 private:
-  void          save( std::ofstream& os, const GMlib::SceneObject* obj);
+  void                                              save( std::ofstream& os, const GMlib::SceneObject* obj);
 
-  void          saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
-  void          savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
+  void                                              saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
+
+  void                                              savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
+
+  void                                              visit(ODDL::Structure* T);
+
+  void                                              preorder(ODDL::Structure* T);
 
 
 protected:
@@ -68,11 +134,15 @@ private:
   int                                               _timer_id;
 
   std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr };
+  std::shared_ptr<GMlib::DefaultSelectRenderer>     _select_renderer { nullptr };
   std::shared_ptr<GMlib::Camera>                    _camera   { nullptr };
   QRect                                             _viewport { QRect(0,0,1,1) };
 
   std::shared_ptr<GMlib::PointLight>                _light;
   std::shared_ptr<TestTorus>                        _testtorus;
+
+  std::shared_ptr<GMlib::PSphere<float>>             _sphere;
+
 
 private:
   static std::unique_ptr<Scenario>                  _instance;
