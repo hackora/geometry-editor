@@ -8,16 +8,16 @@
 
 class TestTorus : public GMlib::PTorus<float> {
 public:
-  using PTorus::PTorus;
-  ~TestTorus() override;
+    using PTorus::PTorus;
+    ~TestTorus() override;
 
-  void test01();
+    void test01();
 
 protected:
-  void localSimulate(double dt) override;
+    void localSimulate(double dt) override;
 
 private:
-  std::unique_ptr<TestTorus>    _torus {nullptr};
+    std::unique_ptr<TestTorus>    _torus {nullptr};
 
 }; // END class TestTorus
 

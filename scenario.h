@@ -7,28 +7,28 @@ class TestTorus;
 // gmlib
 namespace GMlib {
 
-  class Scene;
-  class SceneObject;
-  class Camera;
-  class PointLight;
-  class DefaultRenderer;
-  class DefaultSelectRenderer;
-  class RenderTarget;
+class Scene;
+class SceneObject;
+class Camera;
+class PointLight;
+class DefaultRenderer;
+class DefaultSelectRenderer;
+class RenderTarget;
 
-  template <typename T>
-  class Array;
+template <typename T>
+class Array;
 
-  template <typename T, int n>
-  class Vector;
+template <typename T, int n>
+class Vector;
 
-  template <typename T, int n>
-  class Point;
+template <typename T, int n>
+class Point;
 
-  template <typename T>
-  class PTorus;
+template <typename T>
+class PTorus;
 
-  template <typename T>
-  class PSphere;
+template <typename T>
+class PSphere;
 }
 
 // qt
@@ -44,110 +44,112 @@ namespace GMlib {
 
 
 class Scenario: public QObject {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  explicit Scenario();
-  virtual ~Scenario();
+    explicit Scenario();
+    virtual ~Scenario();
 
-  void                                              initialize();
-  void                                              deinitialize();
-  virtual void                                      initializeScenario();
+    void                                              initialize();
+    void                                              deinitialize();
+    virtual void                                      initializeScenario();
 
-  void                                              startSimulation();
-  void                                              stopSimulation();
-  void                                              toggleSimulation();
-  bool                                              isSimulationRunning();
+    void                                              startSimulation();
+    void                                              stopSimulation();
+    void                                              toggleSimulation();
+    bool                                              isSimulationRunning();
 
-  void                                              render( const QRect& viewport, GMlib::RenderTarget& target );
-  void                                              prepare();
+    void                                              render( const QRect& viewport, GMlib::RenderTarget& target );
+    void                                              prepare();
 
-  void                                              replotTesttorus();
+    void                                              load();
 
+    void                                              save();
 
-  void                                              load();
+    void                                              frontView();
 
-  void                                              save();
+    void                                              topView();
 
-  void                                              frontView();
+    void                                              sideView();
 
-  void                                              topView();
+    void                                              toggleSelection(bool var);
 
-  void                                              sideView();
+    GMlib::Array<GMlib::SceneObject*>                 selectedObjects();
 
-  void                                              toggleSelection(bool var);
+    void                                              addtoSelection(GMlib::SceneObject* obj);
 
-  GMlib::Array<GMlib::SceneObject*>                 selectedObjects();
+    void                                              removefromSelection(GMlib::SceneObject* obj);
 
-  void                                              addtoSelection(GMlib::SceneObject* obj);
+    void                                              cycleSelection(bool forward);
 
-  void                                              removefromSelection(GMlib::SceneObject* obj);
+    void findSceneObject(const QPoint& pos);
 
-  void                                              cycleSelection(bool forward);
+    const GMlib::Point <int ,2>                       fromQtToGMlibViewPoint(const  QPoint& pos);
 
-  GMlib::SceneObject*                               findSceneObject(const QPoint& pos);
+    void                                              moveCamera(QPoint current, QPoint previous);
 
-  const GMlib::Point <int ,2>                       fromQtToGMlibViewPoint(const  QPoint& pos);
+    void                                              rotateCamera(QPoint current, QPoint previous);
 
-  void                                              moveCamera(QPoint current, QPoint previous);
+    void                                              moveCameraWheel(QPoint delta);
 
-  void                                              rotateCamera(QPoint current, QPoint previous);
+    void                                              rotateSelectedObjects(QPoint current, QPoint previous);
 
-  void                                              moveCameraWheel(QPoint delta);
+    void                                              translateSelectedObjects(QPoint current, QPoint previous);
 
-  void                                              rotateSelectedObjects(GMlib::Array< GMlib::SceneObject*> objs, QPoint current, QPoint previous);
+    void                                              scaleSelectedObjects(QPoint current, QPoint previous);
 
-  void                                              translateSelectedObjects(GMlib::Array< GMlib::SceneObject*> objs, QPoint current, QPoint previous);
+    void                                              addSphere();
 
-  void                                              scaleSelectedObjects(GMlib::Array< GMlib::SceneObject*> objs, QPoint current, QPoint previous);
+    void                                              addPTorus();
 
-  void                                              addSphere();
+    void                                              clearScene();
 
-  void                                              addPTorus();
+    void                                              addPCylinder();
 
-  void                                              clearScene();
+    void                                              addPCone();
 
-  void                                              addPCylinder();
+    void                                              addPBentHorns();
 
-  void                                              addPCone();
+    void                                              addPApple();
 
-  void                                              addPBentHorns();
+    void                                              addPlane();
 
-  void                                              addPApple();
+    void                                              addSeaShell();
+
+    void                                              addKleinsBottle();
+
+    void                                              addBoysSurface();
 
 private:
-  void                                              save( std::ofstream& os, const GMlib::SceneObject* obj);
+    void                                              save( std::ofstream& os, const GMlib::SceneObject* obj);
 
-  void                                              saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
+    void                                              saveSO( std::ofstream& os, const GMlib::SceneObject* obj);
 
-  void                                              savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
+    void                                              savePT( std::ofstream& os, const GMlib::PTorus<float>* obj);
 
-  void                                              visit(ODDL::Structure* T);
+    void                                              visit(ODDL::Structure* T);
 
-  void                                              preorder(ODDL::Structure* T);
+    void                                              preorder(ODDL::Structure* T);
 
 
 protected:
-  void                                              timerEvent(QTimerEvent *e) override;
+    void                                              timerEvent(QTimerEvent *e) override;
 
 private:
-  std::shared_ptr<GMlib::Scene>                     _scene;
-  int                                               _timer_id;
+    std::shared_ptr<GMlib::Scene>                     _scene;
+    int                                               _timer_id;
 
-  std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr };
-  std::shared_ptr<GMlib::DefaultSelectRenderer>     _select_renderer { nullptr };
-  std::shared_ptr<GMlib::Camera>                    _camera   { nullptr };
-  QRect                                             _viewport { QRect(0,0,1,1) };
+    std::shared_ptr<GMlib::DefaultRenderer>           _renderer { nullptr };
+    std::shared_ptr<GMlib::DefaultSelectRenderer>     _select_renderer { nullptr };
+    std::shared_ptr<GMlib::Camera>                    _camera   { nullptr };
+    QRect                                             _viewport { QRect(0,0,1,1) };
 
-  std::shared_ptr<GMlib::PointLight>                _light;
-  std::shared_ptr<TestTorus>                        _testtorus;
-
-  std::shared_ptr<GMlib::PSphere<float>>             _sphere;
+    std::shared_ptr<GMlib::PointLight>                _light;
 
 
 private:
-  static std::unique_ptr<Scenario>                  _instance;
+    static std::unique_ptr<Scenario>                  _instance;
 public:
-  static Scenario&                                  instance();
+    static Scenario&                                  instance();
 };
 
 #endif

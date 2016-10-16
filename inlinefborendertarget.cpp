@@ -2,13 +2,13 @@
 
 InlineFboRenderTarget::InlineFboRenderTarget() {
 
-  _gl.initializeOpenGLFunctions();
+    _gl.initializeOpenGLFunctions();
 }
 
 GLint&
 InlineFboRenderTarget::fbo() {
 
-  return _fbo;
+    return _fbo;
 }
 
 void

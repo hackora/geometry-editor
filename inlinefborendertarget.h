@@ -9,18 +9,18 @@
 
 class InlineFboRenderTarget : public GMlib::RenderTarget {
 public:
-  explicit InlineFboRenderTarget();
+    explicit InlineFboRenderTarget();
 
-  GLint&                    fbo();
+    GLint&                    fbo();
 
 private:
-  mutable QOpenGLFunctions  _gl;
-  GLint                     _fbo;
+    mutable QOpenGLFunctions  _gl;
+    GLint                     _fbo;
 
-  void      doPrepare()  const override;
-  void      doBind()   const override;
-  void      doUnbind() const override;
-  void      doResize()  override;
+    void      doPrepare()  const override;
+    void      doBind()   const override;
+    void      doUnbind() const override;
+    void      doResize()  override;
 };
 
 #endif // INLINEFBORENDERTARGET_H

@@ -27,46 +27,44 @@ struct ManipulationModes
 
 
 class GuiApplication : public QGuiApplication {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  explicit GuiApplication(int& argc, char** argv);
-  ~GuiApplication();
+    explicit GuiApplication(int& argc, char** argv);
+    ~GuiApplication();
 
 private:
-  Window                                      _window;
-  Scenario                                    _scenario;
+    Window                                      _window;
+    Scenario                                    _scenario;
 
-  std::queue<std::shared_ptr<QInputEvent>>    _input_events;
+    std::queue<std::shared_ptr<QInputEvent>>    _input_events;
 
-  std::queue<std::shared_ptr<const QString>>  _button_events;
+    std::queue<std::shared_ptr<const QString>>  _button_events;
 
-  QPoint                                      _current{0,0};
-  QPoint                                      _previous{0,0};
-  bool                                        _toggle={false};
-  ManipulationModes                           _modes;
+    QPoint                                      _previous{0,0};
+    bool                                        _toggle={false};
+    ManipulationModes                           _modes;
 
-  
+
 
 private slots:
-  void                                        handleGLInputEvents();
-  void                                        handleGLButtonEvents();
-  void                                        handleKeyPress( QKeyEvent* );
-  void                                        handleMouseClick( QMouseEvent* );
-  void                                        handleMouseMove( QHoverEvent* );
-  void                                        handleWheelMove( QWheelEvent* );
-  void                                        handleMouseClickMove( QMouseEvent* );
+    void                                        handleGLInputEvents();
+    void                                        handleGLButtonEvents();
+    void                                        handleKeyPress( QKeyEvent* );
+    void                                        handleMouseClick( QMouseEvent* );
+    void                                        handleMouseMove( QHoverEvent* );
+    void                                        handleWheelMove( QWheelEvent* );
+    void                                        handleMouseClickMove( QMouseEvent* );
 
-  virtual void                                onSceneGraphInitialized();
-  virtual void                                afterOnSceneGraphInitialized();
+    virtual void                                onSceneGraphInitialized();
+    virtual void                                afterOnSceneGraphInitialized();
 
-  virtual void                                onSceneGraphInvalidated();
-
+    virtual void                                onSceneGraphInvalidated();
 
 signals:
-  void                                        signOnSceneGraphInitializedDone();
+    void                                        signOnSceneGraphInitializedDone();
 
 public slots:
-  void                                        handleGUIButtons(const QString &in);
+    void                                        handleGUIButtons(const QString &in);
 };
 
 #endif // GUIAPPLICATION_H

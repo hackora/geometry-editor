@@ -23,10 +23,6 @@
 #include <iomanip>
 
 
-
-
-
-
 class SimStateLock {
 public:
     SimStateLock( Scenario& scenario ) : _scenario{scenario} {
@@ -43,11 +39,6 @@ public:
     Scenario&   _scenario;
     bool        _state;
 };
-
-
-
-
-
 
 Scenario::Scenario() : QObject(), _timer_id{0}, _select_renderer{nullptr} {
 
@@ -77,9 +68,10 @@ Scenario::deinitialize() {
 
     _renderer->releaseCamera();
     _scene->removeCamera(_camera.get());
+    _camera.reset();
 
     _renderer.reset();
-    _camera.reset();
+    _select_renderer.reset();
 
     _scene->clear();
     _scene.reset();
@@ -197,11 +189,8 @@ Scenario::isSimulationRunning() {
     return _scene->isRunning();
 }
 
-void
-Scenario::replotTesttorus() { _testtorus->replot(4, 4, 1, 1); }
-
 /**
- * Visit every ODDL structure
+ * Visit every ODDL structure, incomplete at the moment loads very basic files.
  */
 
 void Scenario::visit(ODDL::Structure* T){
@@ -452,7 +441,6 @@ void Scenario::frontView() {
     auto init_cam_up        = GMlib::Vector<float,3>(  0.0f, 0.0f, 1.0f );
     _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
     _camera->updateCameraOrientation();
-    _camera->updateFrustum();
 }
 
 void Scenario::topView() {
@@ -463,7 +451,6 @@ void Scenario::topView() {
     auto init_cam_up        = GMlib::Vector<float,3>(  0.0f, 1.0f, 0.0f );
     _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
     _camera->updateCameraOrientation();
-    _camera->updateFrustum();
 }
 
 void Scenario::sideView() {
@@ -474,7 +461,6 @@ void Scenario::sideView() {
     auto init_cam_up        = GMlib::Vector<float,3>(  0.0f, 0.0f, 1.0f );
     _camera->set(init_cam_pos,init_cam_dir,init_cam_up);
     _camera->updateCameraOrientation();
-    _camera->updateFrustum();
 }
 
 /**
@@ -488,7 +474,6 @@ const GMlib::Point <int ,2> Scenario::fromQtToGMlibViewPoint(const  QPoint& pos)
     int y = _camera->getViewportH() -pos.y()-1;
     auto gm_point = GMlib::Point <int ,2>(x,y);
     return(gm_point);
-
 }
 
 /**
@@ -496,17 +481,20 @@ const GMlib::Point <int ,2> Scenario::fromQtToGMlibViewPoint(const  QPoint& pos)
  * the scene
  */
 
-GMlib::SceneObject* Scenario::findSceneObject(const  QPoint& pos) {
+void Scenario::findSceneObject(const  QPoint& pos) {
 
     _select_renderer->setCamera( _camera.get());
-    _select_renderer->reshape( GMlib::Vector<int,2>(600, 600));
+    _select_renderer->reshape( GMlib::Vector<int,2>(_viewport.width(), _viewport.height()));
     _select_renderer->prepare();
     _select_renderer->select(0);
     auto gm_point = fromQtToGMlibViewPoint(pos);
     auto sel_obj = _select_renderer->findObject(gm_point(0),gm_point(1));
     _select_renderer->releaseCamera();
-    return(sel_obj);
-
+    if(sel_obj != nullptr)
+    {
+        toggleSelection(false);
+        addtoSelection(sel_obj);
+    }
 }
 
 /**
@@ -533,6 +521,12 @@ void Scenario::removefromSelection(GMlib::SceneObject* obj){
     obj->setSelected(false);
     _scene->updateSelection(obj);
 }
+
+/**
+ * Cycles between the objects, however the camera is also part of this cycling.
+ * Would be better if the camera was not part of the _scene Array
+ *
+ */
 void Scenario::cycleSelection(bool forward){
     if(_scene->getSize()){
         GMlib::Array<GMlib::SceneObject*> s_objs = _scene->getSelectedObjects();
@@ -585,7 +579,7 @@ void Scenario::moveCamera(QPoint current, QPoint previous){
     auto gm_current = fromQtToGMlibViewPoint(current);
     auto gm_previous = fromQtToGMlibViewPoint(previous);
     float s = 0.025;
-    GMlib::Vector<float,3> d = s * float(gm_current(0) -gm_previous(0))*_camera->getGlobalSide()  -  s * float(gm_current(1)-gm_previous(1))*_camera->getGlobalUp();
+    GMlib::Vector<float,3> d = s * float(gm_current(0) -gm_previous(0))*_camera->getSide()  -  s * float(gm_current(1)-gm_previous(1))*_camera->getUp();
     _camera->move(d);
 }
 
@@ -601,16 +595,15 @@ void Scenario::rotateCamera(QPoint current, QPoint previous){
 
     auto gm_current = fromQtToGMlibViewPoint(current);
     auto gm_previous = fromQtToGMlibViewPoint(previous);
-
-    auto v_rot = (gm_current(0) -gm_previous(0))*_camera->getGlobalUp() - (gm_current(1)-gm_previous(1))*_camera->getGlobalSide();
-    auto a = 2* M_PI * sqrt(pow((float(gm_current(0) -gm_previous(0))/w),2) + pow((float(gm_current(1)-gm_previous(1))/h),2));
-    auto condition = sqrt(pow((float(gm_current(0) -gm_previous(0))),2) + pow((float(gm_current(1)-gm_previous(1))),2));
-
-    if (condition > 1e-6){
+    float dx = gm_current(0) -gm_previous(0);
+    float dy = gm_current(1)-gm_previous(1);
+    float len = sqrt(pow(dx,2) + pow(dy,2));
+    auto v_rot = (dx)*_camera->getUp() - (dy)*_camera->getSide();
+    auto a = 2* M_PI*sqrt(pow(dx/w,2) + pow(dy/h,2));
+    if (len > 1e-6){
 
         _camera->rotateGlobal(a,GMlib::Point<float,3> (0,0,0),v_rot);
         _camera->updateCameraOrientation();
-        _camera->updateFrustum();
     }
 }
 
@@ -626,7 +619,6 @@ void Scenario::moveCameraWheel(QPoint delta){
     GMlib::Vector<float,3> v = _camera->getDir();
     GMlib::Vector<float,3> d(v[0]*h,v[1]*h,v[2]*h);
     _camera->move(d);
-    //_scene->remove(_scene->find(_sphere->getName()));
 }
 
 /**
@@ -634,15 +626,15 @@ void Scenario::moveCameraWheel(QPoint delta){
  * Rotate Selected Object(s)
  */
 
-void Scenario::rotateSelectedObjects(GMlib::Array<GMlib::SceneObject*> objs, QPoint current, QPoint previous ){
-
+void Scenario::rotateSelectedObjects(QPoint current, QPoint previous ){
+    auto objs = _scene->getSelectedObjects();
     auto w = _camera->getViewportW();
     auto h = _camera->getViewportH();
 
     auto gm_current = fromQtToGMlibViewPoint(current);
     auto gm_previous = fromQtToGMlibViewPoint(previous);
 
-    auto v_rot = (gm_current(0) -gm_previous(0))*_camera->getGlobalUp() - (gm_current(1)-gm_previous(1))*_camera->getGlobalSide();
+    auto v_rot = (gm_current(0) -gm_previous(0))*_camera->getUp() - (gm_current(1)-gm_previous(1))*_camera->getSide();
     auto a = 2* M_PI * sqrt(pow((float(gm_current(0) -gm_previous(0))/w),2) + pow((float(gm_current(1)-gm_previous(1))/h),2));
     auto condition = sqrt(pow((float(gm_current(0) -gm_previous(0))),2) + pow((float(gm_current(1)-gm_previous(1))),2));
 
@@ -650,21 +642,20 @@ void Scenario::rotateSelectedObjects(GMlib::Array<GMlib::SceneObject*> objs, QPo
 
         if (objs.getSize()==1){
             //qDebug()<<"one object";
-            GMlib::SceneObject* obj = const_cast<GMlib::SceneObject*>(objs[0]);
-            obj->rotateGlobal(a,v_rot);
+            objs[0]->rotateGlobal(a,v_rot);
         }
 
         else if (objs.getSize()>1){
 
-            GMlib::SceneObject* obj = const_cast<GMlib::SceneObject*>(objs[0]);
+            GMlib::SceneObject* obj = objs[0];
             auto sphere = obj->getSurroundingSphere();
 
             for(int i =1;i<objs.getSize();++i){
-                GMlib::SceneObject* obj = const_cast<GMlib::SceneObject*>(objs[i]);
+                GMlib::SceneObject* obj = objs[i];
                 sphere.operator +=(obj->getSurroundingSphere());
             }
             for(int i =0;i<objs.getSize();++i){
-                GMlib::SceneObject* obj = const_cast<GMlib::SceneObject*>(objs[i]);
+                GMlib::SceneObject* obj = objs[i];
                 if (obj->getParent()==nullptr)
                     _scene->find(obj->getName())->rotateGlobal(a,sphere.getPos(),v_rot);
             }
@@ -682,18 +673,18 @@ void Scenario::rotateSelectedObjects(GMlib::Array<GMlib::SceneObject*> objs, QPo
  * Translate Selected Object(s)
  */
 
-void Scenario::translateSelectedObjects(GMlib::Array<GMlib::SceneObject*> objs, QPoint current, QPoint previous){
-
+void Scenario::translateSelectedObjects(QPoint current, QPoint previous){
+    auto objs = _scene->getSelectedObjects();
     auto gm_current = fromQtToGMlibViewPoint(current);
     auto gm_previous = fromQtToGMlibViewPoint(previous);
     float s = 0.025;
     GMlib::Vector<float,3> v_tran = s* float(gm_current(1)-gm_previous(1))*_camera->getUp() - s * float(gm_current(0) -gm_previous(0))*_camera->getSide();
 
     for(int i =0;i<objs.getSize();++i){
-        GMlib::SceneObject* obj = const_cast<GMlib::SceneObject*>(objs[i]);
-        if (obj->getParent()==nullptr)
+        //Makes sure that we do not translate the children relative to the parent while translate the parent
+        if (_scene->find(objs[i]->getName())->getParent()==nullptr)
             //_scene->find(obj->getName())->translateGlobal(0.025*v_tran,true);
-            _scene->find(obj->getName())->move(v_tran);
+            _scene->find(objs[i]->getName())->move(v_tran);
     }
 }
 
@@ -702,18 +693,17 @@ void Scenario::translateSelectedObjects(GMlib::Array<GMlib::SceneObject*> objs, 
  * Scale Selected Object(s)
  */
 
-void Scenario::scaleSelectedObjects(GMlib::Array<GMlib::SceneObject*> objs, QPoint current, QPoint previous){
-
+void Scenario::scaleSelectedObjects(QPoint current, QPoint previous){
+    auto objs = _scene->getSelectedObjects();
     auto gm_current = fromQtToGMlibViewPoint(current);
     auto gm_previous = fromQtToGMlibViewPoint(previous);
 
     for(int i =0;i<objs.getSize();++i){
-        GMlib::SceneObject* obj = const_cast<GMlib::SceneObject*>(objs[i]);
-        if (obj->getParent()==nullptr){
-            auto dh = _camera->deltaTranslate(obj);
+        if (_scene->find(objs[i]->getName())->getParent()==nullptr){
+            auto dh = _camera->deltaTranslate(objs[i]);
             auto d = dh*(gm_current(0) -gm_previous(0))*_camera->getSide()  -  dh*(gm_current(1)-gm_previous(1))*_camera->getUp();
             if(d.getLength()<1000){
-                _scene->find(obj->getName())->scale(1.0f+ d(1));
+                _scene->find(objs[i]->getName())->scale(1.0f+ d(1));
             }
         }
     }
@@ -730,8 +720,8 @@ void Scenario::clearScene(){
 
     for (int i=1;i<size;++i){ // I am excluding the camera from the removal
         _scene->remove((*_scene)[i]);
-
     }
+    _scene->clearSelection();
 }
 
 /**
@@ -748,15 +738,15 @@ void Scenario::addSphere(){
 }
 
 /**
- * Add a PTorus
- *
+ * Add objects
+ * This way of doing it is not very good, it is prone to memory leaks
  */
 
 void Scenario::addPTorus(){
 
-    auto obj = new TestTorus();
+    auto obj = new GMlib::PTorus<float>();
+    obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    //obj->move(5);
     _scene->insert(obj);
 }
 
@@ -765,7 +755,6 @@ void Scenario::addPCylinder(){
     auto obj = new GMlib::PCylinder<float>(4);
     obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    //obj->move(5);
     _scene->insert(obj);
 }
 
@@ -774,7 +763,6 @@ void Scenario::addPCone(){
     auto obj = new GMlib::PCone<float>(1);
     obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    //obj->move(5);
     _scene->insert(obj);
 }
 
@@ -783,7 +771,6 @@ void Scenario::addPBentHorns(){
     auto obj = new GMlib::PBentHorns<float>();
     obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    //obj->move(5);
     _scene->insert(obj);
 }
 
@@ -792,6 +779,37 @@ void Scenario::addPApple(){
     auto obj = new GMlib::PApple<float>(1);
     obj->toggleDefaultVisualizer();
     obj->replot(50,50,1,1);
-    //obj->move(5);
     _scene->insert(obj);
+}
+void Scenario::addPlane()
+{
+    auto newobj = new GMlib::PPlane<float>(GMlib::Point<float,3>(0,0,0),GMlib::Vector<float,3>(1,0,0),GMlib::Vector<float,3>(0,0,1));
+    newobj->toggleDefaultVisualizer();
+    newobj->replot(20,20,20,20);
+    _scene->insert(newobj);
+}
+void Scenario::addSeaShell()
+{
+    auto newobj = new GMlib::PSeashell<float>();
+    newobj->toggleDefaultVisualizer();
+    newobj->replot(20,20,20,20);
+    _scene->insert(newobj);
+}
+void Scenario::addKleinsBottle()
+{
+    auto newobj = new GMlib::PKleinsBottle<float>();
+    newobj->toggleDefaultVisualizer();
+    newobj->replot(20,20,20,20);
+    _scene->insert(newobj);
+    newobj->setSelected(true);
+    _scene->updateSelection(newobj);
+}
+void Scenario::addBoysSurface()
+{
+    auto newobj = new GMlib::PBoysSurface<float>();
+    newobj->toggleDefaultVisualizer();
+    newobj->replot(20,20,20,20);
+    _scene->insert(newobj);
+    newobj->setSelected(true);
+    _scene->updateSelection(newobj);
 }

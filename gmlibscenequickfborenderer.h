@@ -18,20 +18,20 @@ class GMlibSceneQuickFbo;
 class GMlibSceneQuickFboRenderer : public QQuickFramebufferObject::Renderer {
 
 public:
-  GMlibSceneQuickFboRenderer();
+    GMlibSceneQuickFboRenderer();
 
-  QOpenGLFramebufferObject*   createFramebufferObject(const QSize &size) override;
+    QOpenGLFramebufferObject*   createFramebufferObject(const QSize &size) override;
 
-  void                        render() override;
-  void                        synchronize(QQuickFramebufferObject *item) override;
+    void                        render() override;
+    void                        synchronize(QQuickFramebufferObject *item) override;
 
 
 private:
-  QOpenGLFunctions            _gl;
-  GMlibSceneQuickFbo*         _item;
-  Window*                     _window;
-  QSize                       _size;
-  InlineFboRenderTarget       _rt;
+    QOpenGLFunctions            _gl;
+    GMlibSceneQuickFbo*         _item;
+    Window*                     _window;
+    QSize                       _size;
+    InlineFboRenderTarget       _rt;
 };
 
 

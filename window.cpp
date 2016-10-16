@@ -7,42 +7,42 @@
 
 Window::Window(QWindow *parent) : QQuickView(parent) {
 
-  qmlRegisterType<GMlibSceneQuickFbo>("SceneGraphRendering", 1, 0, "GMlibSceneRenderer");
+    qmlRegisterType<GMlibSceneQuickFbo>("SceneGraphRendering", 1, 0, "GMlibSceneRenderer");
 
-  setSurfaceType(QSurface::OpenGLSurface);
-  setPersistentOpenGLContext(true);
-  setPersistentSceneGraph(true);
+    setSurfaceType(QSurface::OpenGLSurface);
+    setPersistentOpenGLContext(true);
+    setPersistentSceneGraph(true);
 
-  setResizeMode(SizeRootObjectToView);
-  setMinimumSize( QSize( 1100, 600 ) );
-  setMaximumSize( QSize( 1100, 600 ) );
+    setResizeMode(SizeRootObjectToView);
+    setMinimumSize( QSize( 1100, 600 ) );
+    setMaximumSize( QSize( 1100, 600 ) );
 
 
-  QSurfaceFormat format;
-  if(QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {
+    QSurfaceFormat format;
+    if(QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {
 
-    format.setVersion(4,0);                                   // GMlib is compatible with OpenGL >= 3.3
-    format.setProfile(QSurfaceFormat::CompatibilityProfile);
-    format.setOption(QSurfaceFormat::DeprecatedFunctions);
+        format.setVersion(4,0);                                   // GMlib is compatible with OpenGL >= 3.3
+        format.setProfile(QSurfaceFormat::CompatibilityProfile);
+        format.setOption(QSurfaceFormat::DeprecatedFunctions);
 
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    format.setSwapInterval(1);                                // 0 = vsync off
-  }
-  format.setDepthBufferSize(24);
-  format.setRedBufferSize(8);
-  format.setGreenBufferSize(8);
-  format.setBlueBufferSize(8);
-  format.setAlphaBufferSize(8);
-  format.setSamples(4);
-  format.setStencilBufferSize(8);
+        format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+        format.setSwapInterval(1);                                // 0 = vsync off
+    }
+    format.setDepthBufferSize(24);
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setAlphaBufferSize(8);
+    format.setSamples(4);
+    format.setStencilBufferSize(8);
 
-  QSurfaceFormat::setDefaultFormat(format);
-  setFormat(format);
+    QSurfaceFormat::setDefaultFormat(format);
+    setFormat(format);
 }
 
 void Window::releasePersistence() {
 
-  setPersistentOpenGLContext(false);
-  setPersistentSceneGraph(false);
+    setPersistentOpenGLContext(false);
+    setPersistentSceneGraph(false);
 }
 

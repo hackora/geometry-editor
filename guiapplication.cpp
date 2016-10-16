@@ -57,12 +57,12 @@ GuiApplication::GuiApplication(int& argc, char **argv) : QGuiApplication(argc, a
     connect( &_window, &Window::signWheelEventOccurred,
              this,     &GuiApplication::handleWheelMove );
 
-   _window.setSource(QUrl("qrc:///qml/main.qml"));
+    _window.setSource(QUrl("qrc:///qml/main.qml"));
 
-   QQuickItem* item = _window.rootObject();
+    QQuickItem* item = _window.rootObject();
 
-   connect( item, SIGNAL(buttonClicked(QString)),
-            this,     SLOT(handleGUIButtons(QString)));
+    connect( item, SIGNAL(buttonClicked(QString)),
+             this,     SLOT(handleGUIButtons(QString)));
 
     _window.show();
 }
@@ -126,8 +126,7 @@ void GuiApplication::handleGLInputEvents() {
 
         if(ke){
             if(ke->key() == Qt::Key_P) {
-                qDebug() << "Handling the P button";
-                _scenario.replotTesttorus();
+                //replot_Torus?
             }
             else if(ke->key() == Qt::Key_S && ke->modifiers()== Qt::ControlModifier) {
                 _scenario.save();
@@ -161,10 +160,10 @@ void GuiApplication::handleGLInputEvents() {
                 _scenario.frontView();
             }
             else if(ke->key() == Qt::Key_2) {
-                _scenario.topView();
+                _scenario.sideView();
             }
             else if(ke->key() == Qt::Key_3) {
-                _scenario.sideView();
+                _scenario.topView();
             }
             else if(ke->key() == Qt::Key_Left){
                 _scenario.cycleSelection(true);
@@ -183,70 +182,57 @@ void GuiApplication::handleMouseClick( QMouseEvent* e  ) {
         _scenario.findSceneObject(e->pos());
 
     }
+    if( e->buttons() == Qt::RightButton && !_modes.noMode()) {
+        _modes.allOff();
+
+    }
     else if (e->buttons() == Qt::MiddleButton){
         _previous = e->pos();
     }
 
 }
 
-void GuiApplication::handleMouseClickMove( QMouseEvent* e) {
+void GuiApplication::handleMouseClickMove(QMouseEvent* e) {
 
-    if (_previous!=_current){
-        _previous = _current;
-        _current = e->pos();
+    if(_previous.isNull())
+        _previous = e->pos();
+    if (e->buttons()== Qt::MiddleButton && QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier) )
+        _scenario.moveCamera(e->pos(),_previous);
 
-        if (e->buttons()== Qt::MiddleButton && QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier) )
-            _scenario.moveCamera(_current,_previous);
-
-
-        else if(e->buttons()== Qt::MiddleButton){
-            _scenario.rotateCamera(_current,_previous);
-        }
+    else if(e->buttons()== Qt::MiddleButton){
+        _scenario.rotateCamera(e->pos(),_previous);
     }
-    else{
-        _current = e->pos();
-        //qDebug()<<"first run";
-    }
+    _previous = e->pos();
 }
 
 void GuiApplication::handleMouseMove( QHoverEvent* e) {
 
-    if (_previous!=_current){
-        _previous = _current;
-        _current = e->pos();
+    if(_previous.isNull())
+        _previous = e->pos();
 
-        if(_modes.rotMode){
-            GMlib::Array< GMlib::SceneObject*> arr= _scenario.selectedObjects();
-            _scenario.rotateSelectedObjects(arr,_current,_previous);
-        }
-
-        else if(_modes.transMode){
-            GMlib::Array< GMlib::SceneObject*> arr= _scenario.selectedObjects();
-            _scenario.translateSelectedObjects(arr,_current,_previous);
-        }
-
-        else if(_modes.scaleMode){
-            GMlib::Array< GMlib::SceneObject*> arr= _scenario.selectedObjects();
-            _scenario.scaleSelectedObjects(arr,_current,_previous);
-        }
-    }
-    else{
-        _current = e->pos();
-        //qDebug()<<"first run";
+    if(_modes.rotMode){
+        _scenario.rotateSelectedObjects(e->pos(),_previous);
     }
 
+    else if(_modes.transMode){
+        _scenario.translateSelectedObjects(e->pos(),_previous);
+    }
+
+    else if(_modes.scaleMode){
+        _scenario.scaleSelectedObjects(e->pos(),_previous);
+    }
+     _previous = e->pos();
 }
 
 void GuiApplication::handleWheelMove( QWheelEvent* e  ) {
 
     _scenario.moveCameraWheel(e->angleDelta());
-    //qDebug()<<"camera moved"<<e->pixel_delta();
 
 }
 
 void GuiApplication::handleGUIButtons(const QString &in){
 
-   _button_events.push(std::make_shared<const QString >(in));
+    _button_events.push(std::make_shared<const QString >(in));
 
 }
 
@@ -254,51 +240,74 @@ void GuiApplication::handleGLButtonEvents() {
 
     while(!_button_events.empty()) {
 
-
         auto e  = _button_events.front();
         const QString ke = *std::dynamic_pointer_cast<const QString>(e);
-        if (! QString::compare(ke,"sphere")){
+
+        if (!QString::compare(ke,"sphere")){
 
             _scenario.addSphere();
 
         }
 
-        else if(! QString::compare(ke,"torus")){
+        else if(!QString::compare(ke,"torus")){
 
             _scenario.addPTorus();
 
         }
 
-        else if(! QString::compare(ke,"clear")){
-
-            _scenario.clearScene();
-
-        }
-
-        else if(! QString::compare(ke,"cylinder")){
+        else if(!QString::compare(ke,"cylinder")){
 
             _scenario.addPCylinder();
 
         }
 
-        else if(! QString::compare(ke,"cone")){
+        else if(!QString::compare(ke,"cone")){
 
             _scenario.addPCone();
 
         }
 
-        else if(! QString::compare(ke,"benthorns")){
+        else if(!QString::compare(ke,"benthorns")){
 
             _scenario.addPBentHorns();
 
         }
 
-        else if(! QString::compare(ke,"apple")){
+        else if(!QString::compare(ke,"apple")){
 
             _scenario.addPApple();
 
         }
 
+        else if(!QString::compare(ke,"plane")){
+
+            _scenario.addPlane();
+
+        }
+
+        else if(!QString::compare(ke,"seashell")){
+
+            _scenario.addSeaShell();
+
+        }
+
+        else if(!QString::compare(ke,"kleinsbottle")){
+
+            _scenario.addKleinsBottle();
+
+        }
+
+        else if(!QString::compare(ke,"boyssurface")){
+
+            _scenario.addBoysSurface();
+
+        }
+
+        else if(!QString::compare(ke,"clear")){
+
+            _scenario.clearScene();
+
+        }
 
         _button_events.pop();
     }
