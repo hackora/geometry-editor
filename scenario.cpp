@@ -724,7 +724,7 @@ void Scenario::clearScene(){
 
 /**
  * Add objects
- * This way of doing it is not very good, it is prone to memory leaks
+ * This way of doing it is not very good, it is prone to memory leaks[fixed for now]
  */
 
 void Scenario::addSphere(){
