@@ -39,6 +39,8 @@ class PSphere;
 #include <iostream>
 #include <memory>
 
+#include <vector>
+
 // openddl
 #include "openddl/openddl.h"
 
@@ -81,7 +83,7 @@ public:
 
     void                                              cycleSelection(bool forward);
 
-    void findSceneObject(const QPoint& pos);
+    GMlib::SceneObject*                               findSceneObject(const QPoint& pos);
 
     const GMlib::Point <int ,2>                       fromQtToGMlibViewPoint(const  QPoint& pos);
 
@@ -144,6 +146,7 @@ private:
     QRect                                             _viewport { QRect(0,0,1,1) };
 
     std::shared_ptr<GMlib::PointLight>                _light;
+    std::vector<std::unique_ptr<GMlib::SceneObject>>  _scene_vector;
 
 
 private:

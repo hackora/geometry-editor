@@ -74,7 +74,9 @@ Scenario::deinitialize() {
     _select_renderer.reset();
 
     _scene->clear();
+    _scene_vector.clear();
     _scene.reset();
+
 
 
     // Clean up GMlib GL backend
@@ -481,7 +483,7 @@ const GMlib::Point <int ,2> Scenario::fromQtToGMlibViewPoint(const  QPoint& pos)
  * the scene
  */
 
-void Scenario::findSceneObject(const  QPoint& pos) {
+GMlib::SceneObject* Scenario::findSceneObject(const  QPoint& pos) {
 
     _select_renderer->setCamera( _camera.get());
     _select_renderer->reshape( GMlib::Vector<int,2>(_viewport.width(), _viewport.height()));
@@ -490,11 +492,11 @@ void Scenario::findSceneObject(const  QPoint& pos) {
     auto gm_point = fromQtToGMlibViewPoint(pos);
     auto sel_obj = _select_renderer->findObject(gm_point(0),gm_point(1));
     _select_renderer->releaseCamera();
-    if(sel_obj != nullptr)
-    {
+    if(sel_obj != nullptr) {
         toggleSelection(false);
         addtoSelection(sel_obj);
     }
+    return sel_obj;
 }
 
 /**
@@ -716,25 +718,8 @@ void Scenario::scaleSelectedObjects(QPoint current, QPoint previous){
 
 void Scenario::clearScene(){
 
-    auto size = _scene->getSize();
-
-    for (int i=1;i<size;++i){ // I am excluding the camera from the removal
-        _scene->remove((*_scene)[i]);
-    }
-    _scene->clearSelection();
-}
-
-/**
- * Add a sphere
- *
- */
-
-void Scenario::addSphere(){
-
-    auto obj = new GMlib::PSphere<float>(1);
-    obj->toggleDefaultVisualizer();
-    obj->replot(50,50,10,10);
-    _scene->insert(obj);
+    _scene->clear();
+    _scene_vector.clear();
 }
 
 /**
@@ -742,74 +727,105 @@ void Scenario::addSphere(){
  * This way of doing it is not very good, it is prone to memory leaks
  */
 
+void Scenario::addSphere(){
+
+    auto obj = std::make_unique<GMlib::PSphere<float>>(1);
+    obj->toggleDefaultVisualizer();
+    obj->replot(50,50,10,10);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
+}
+
 void Scenario::addPTorus(){
 
-    auto obj = new GMlib::PTorus<float>();
+    auto obj = std::make_unique<GMlib::PTorus<float>>();
     obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    _scene->insert(obj);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
 
 void Scenario::addPCylinder(){
 
-    auto obj = new GMlib::PCylinder<float>(4);
+    auto obj = std::make_unique<GMlib::PCylinder<float>>(4);
     obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    _scene->insert(obj);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
 
 void Scenario::addPCone(){
 
-    auto obj = new GMlib::PCone<float>(1);
+    auto obj = std::make_unique<GMlib::PCone<float>>(1);
     obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    _scene->insert(obj);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
 
 void Scenario::addPBentHorns(){
 
-    auto obj = new GMlib::PBentHorns<float>();
+    auto obj = std::make_unique<GMlib::PBentHorns<float>>();
     obj->toggleDefaultVisualizer();
     obj->replot(200,200,1,1);
-    _scene->insert(obj);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
 
 void Scenario::addPApple(){
 
-    auto obj = new GMlib::PApple<float>(1);
+    auto obj = std::make_unique<GMlib::PApple<float>>(1);
     obj->toggleDefaultVisualizer();
     obj->replot(50,50,1,1);
-    _scene->insert(obj);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
-void Scenario::addPlane()
-{
-    auto newobj = new GMlib::PPlane<float>(GMlib::Point<float,3>(0,0,0),GMlib::Vector<float,3>(1,0,0),GMlib::Vector<float,3>(0,0,1));
-    newobj->toggleDefaultVisualizer();
-    newobj->replot(20,20,20,20);
-    _scene->insert(newobj);
+
+void Scenario::addPlane(){
+    auto obj = std::make_unique<GMlib::PPlane<float>>(GMlib::Point<float,3>(0,0,0),GMlib::Vector<float,3>(1,0,0),GMlib::Vector<float,3>(0,0,1));
+    obj->toggleDefaultVisualizer();
+    obj->replot(20,20,20,20);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
-void Scenario::addSeaShell()
-{
-    auto newobj = new GMlib::PSeashell<float>();
-    newobj->toggleDefaultVisualizer();
-    newobj->replot(20,20,20,20);
-    _scene->insert(newobj);
+void Scenario::addSeaShell(){
+    auto obj = std::make_unique<GMlib::PSeashell<float>>();
+    obj->toggleDefaultVisualizer();
+    obj->replot(20,20,20,20);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
-void Scenario::addKleinsBottle()
-{
-    auto newobj = new GMlib::PKleinsBottle<float>();
-    newobj->toggleDefaultVisualizer();
-    newobj->replot(20,20,20,20);
-    _scene->insert(newobj);
-    newobj->setSelected(true);
-    _scene->updateSelection(newobj);
+void Scenario::addKleinsBottle(){
+    auto obj = std::make_unique<GMlib::PKleinsBottle<float>>();
+    obj->toggleDefaultVisualizer();
+    obj->replot(20,20,20,20);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
-void Scenario::addBoysSurface()
-{
-    auto newobj = new GMlib::PBoysSurface<float>();
-    newobj->toggleDefaultVisualizer();
-    newobj->replot(20,20,20,20);
-    _scene->insert(newobj);
-    newobj->setSelected(true);
-    _scene->updateSelection(newobj);
+void Scenario::addBoysSurface(){
+    auto obj = std::make_unique<GMlib::PBoysSurface<float>>();
+    obj->toggleDefaultVisualizer();
+    obj->replot(20,20,20,20);
+    _scene->insert(obj.get());
+    obj->setSelected(true);
+    _scene->updateSelection(obj.get());
+    _scene_vector.push_back(std::move(obj));
 }
